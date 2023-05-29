@@ -1,6 +1,6 @@
 import React from "react";
-import Range from "./components/Range";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Range from "./components/Range";
 import useFetch from "./utils/useFetch.jsx";
 
 //Mock API
@@ -24,11 +24,11 @@ function App() {
           <>
             <Route
               path="/exercise1"
-              element={<Range min={data.min} max={data.max} step={1} />}
+              element={<Range min={data.min} max={data.max} />}
             />
             <Route
               path="/exercise2"
-              element={<Range min={data.min} max={data.max} step={1} />}
+              element={<Range values={data.rangeValues} />}
             />
           </>
         )}
