@@ -1,10 +1,20 @@
 import React from "react";
 import Range from "..";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { formatCurrency } from "../../../utils/helperFunctions.jsx";
 
 describe("Range slider component", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   /**
    * Initial rendering with input values
    */
@@ -13,9 +23,8 @@ describe("Range slider component", () => {
     render(<Range min={1} max={100} />);
     expect(screen.getByTestId("rangeSlider")).toBeInTheDocument();
 
-    const minInputElement = screen.getByTestId("min-value");
-    const maxInputElement = screen.getByTestId("max-value");
-
+    const minInputElement = screen.getByTestId("min-input");
+    const maxInputElement = screen.getByTestId("max-input");
     expect(minInputElement.value).toBe(formatCurrency(1));
     expect(maxInputElement.value).toBe(formatCurrency(100));
   });
@@ -25,11 +34,10 @@ describe("Range slider component", () => {
     render(<Range values={[100, 200, 300, 400]} />);
     expect(screen.getByTestId("rangeSlider")).toBeInTheDocument();
 
-    const minInputElement = screen.getByText(/100 €/i);
-    const maxInputElement = screen.getByText(/400 €/i);
-
-    expect(minInputElement).toBeInTheDocument;
-    expect(maxInputElement).toBeInTheDocument;
+    const minSpanElement = screen.getByTestId("min-value");
+    const maxSpanElement = screen.getByTestId("max-value");
+    expect(minSpanElement.textContent).toBe(formatCurrency(100));
+    expect(maxSpanElement.textContent).toBe(formatCurrency(400));
   });
 
   /**
@@ -38,14 +46,14 @@ describe("Range slider component", () => {
 
   test("should update min and max values when manually changing the input", () => {
     const { getByTestId } = render(<Range min={0} max={100} />);
-    const minValueInput = getByTestId("min-value");
-    const maxValueInput = getByTestId("max-value");
+    const minInputElement = getByTestId("min-input");
+    const maxInputElement = getByTestId("max-input");
 
-    fireEvent.change(minValueInput, { target: { value: "25" } });
-    expect(minValueInput.value).toBe(formatCurrency(25));
+    fireEvent.change(minInputElement, { target: { value: "25" } });
+    expect(minInputElement.value).toBe(formatCurrency(25));
 
-    fireEvent.change(maxValueInput, { target: { value: "80" } });
-    expect(maxValueInput.value).toBe(formatCurrency(80));
+    fireEvent.change(maxInputElement, { target: { value: "80" } });
+    expect(maxInputElement.value).toBe(formatCurrency(80));
   });
 
   /**
@@ -54,8 +62,8 @@ describe("Range slider component", () => {
 
   test("updates min and max values when dragging the thumbs", () => {
     const main = render(<Range min={1} max={100} />);
-    const minThumb = main.getByTestId("minThumb");
-    const maxThumb = main.getByTestId("maxThumb");
+    const minThumb = main.getByTestId("min-thumb");
+    const maxThumb = main.getByTestId("max-thumb");
 
     fireEvent.mouseDown(minThumb);
     fireEvent.mouseMove(document, { clientX: -50 });
@@ -65,8 +73,9 @@ describe("Range slider component", () => {
     fireEvent.mouseMove(document, { clientX: 50 });
     fireEvent.mouseUp(minThumb);
 
-    const minInputElement = screen.getByTestId("min-value");
-    const maxInputElement = screen.getByTestId("max-value");
+    const minInputElement = screen.getByTestId("min-input");
+    const maxInputElement = screen.getByTestId("max-input");
+    console.log(minThumb);
     expect(minInputElement.value).toBe(formatCurrency(1));
     expect(maxInputElement.value).toBe(formatCurrency(100));
   });
@@ -77,7 +86,7 @@ describe("Range slider component", () => {
 
   test("Bullets have cursor grabbing on mouse down", async () => {
     render(<Range min={100} max={300} />);
-    const minThumb = screen.getByTestId("minThumb");
+    const minThumb = screen.getByTestId("min-thumb");
 
     Object.defineProperty(minThumb, "style", {
       value: {

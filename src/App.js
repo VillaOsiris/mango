@@ -4,7 +4,7 @@ import Range from "./components/Range";
 import useFetch from "./utils/useFetch.jsx";
 
 //Mock API
-const APIEndpoint = "http://demo6492050.mockable.io/mockrange";
+const APIEndpoint = "http://demo8880427.mockable.io/mockrange";
 
 function App() {
   const { data, error, loading } = useFetch(APIEndpoint);

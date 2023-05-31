@@ -136,11 +136,12 @@ const Range = ({ values, min, max }) => {
   }, [minValue, maxValue]);
 
   return (
-    <div className="container">
+    <div data-testid="rangeSlider" className="container">
       {values ? (
-        <span>{formatCurrency(minValue)}</span>
+        <span data-testid="min-value">{formatCurrency(minValue)}</span>
       ) : (
         <input
+          data-testid="min-input"
           className="value-input"
           type="text"
           value={formatCurrency(minValue)}
@@ -148,22 +149,25 @@ const Range = ({ values, min, max }) => {
           onChange={handleMinValueChange}
         />
       )}
-      <div className="slider" ref={sliderRef}>
+      <div data-testid="slider-track" className="slider" ref={sliderRef}>
         <div
+          data-testid="min-thumb"
           className="slider-thumb"
           ref={minThumbRef}
           onMouseDown={() => handleMouseDown(true)}
         />
         <div
+          data-testid="max-thumb"
           className="slider-thumb"
           ref={maxThumbRef}
           onMouseDown={() => handleMouseDown(false)}
         />
       </div>
       {values ? (
-        <span>{formatCurrency(maxValue)}</span>
+        <span data-testid="max-value">{formatCurrency(maxValue)}</span>
       ) : (
         <input
+          data-testid="max-input"
           className="value-input"
           type="text"
           value={formatCurrency(maxValue)}
