@@ -8,7 +8,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
-import { formatCurrency } from "../../../utils/helperFunctions.jsx";
+import { formatCurrency } from "@utils/helperFunctions.jsx";
 
 describe("Range slider component", () => {
   afterEach(() => {

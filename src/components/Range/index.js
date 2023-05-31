@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { formatCurrency } from "../../utils/helperFunctions.jsx";
+import { formatCurrency } from "@utils/helperFunctions.jsx";
 import "./Range.css";
 
 const Range = ({ values, min, max }) => {

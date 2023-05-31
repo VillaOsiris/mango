@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Range from "./components/Range";
-import useFetch from "./utils/useFetch.jsx";
+import Range from "@components/Range";
+import useFetch from "@utils/useFetch.jsx";
 
 //Mock API
 const APIEndpoint = "http://demo8880427.mockable.io/mockrange";
