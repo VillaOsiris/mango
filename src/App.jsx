@@ -19,7 +19,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div>
+      <div style={{ position: "absolute" }}>
         <Link to="/exercise1" reloadDocument>
           Exercise 1
         </Link>

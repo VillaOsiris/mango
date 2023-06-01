@@ -6,10 +6,10 @@ module.exports = {
     "^.+\\.(js|jsx)$": "babel-jest",
   },
   moduleNameMapper: {
+    "^@utils/(.*)$": "<rootDir>/src/utils/$1",
     "\\.(css)$": "identity-obj-proxy",
   },
   testEnvironment: "jsdom",
-  testRunner: "jest-circus/runner",
   collectCoverage: true,
   coverageDirectory: "<rootDir>/coverage",
   collectCoverageFrom: ["**/*.{js,jsx}", "!**/node_modules/**"],

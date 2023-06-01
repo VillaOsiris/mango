@@ -1,5 +1,5 @@
 import React from "react";
-import Range from "..";
+import "@testing-library/jest-dom/extend-expect";
 import {
   render,
   screen,
@@ -7,7 +7,7 @@ import {
   cleanup,
   waitFor,
 } from "@testing-library/react";
-import "@testing-library/jest-dom/extend-expect";
+import Range from "../index";
 import { formatCurrency } from "@utils/helperFunctions.jsx";
 
 describe("Range slider component", () => {
