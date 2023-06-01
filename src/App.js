@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Range from "@components/Range";
 import useFetch from "@utils/useFetch.jsx";
 
@@ -19,6 +19,15 @@ function App() {
 
   return (
     <BrowserRouter>
+      <div>
+        <Link to="/exercise1" reloadDocument>
+          Exercise 1
+        </Link>
+        <br />
+        <Link to="/exercise2" reloadDocument>
+          Exercise 2
+        </Link>
+      </div>
       <Routes>
         {data && (
           <>
