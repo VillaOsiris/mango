@@ -3,38 +3,29 @@ import { formatCurrency } from "@utils/helperFunctions.jsx";
 import "./Range.css";
 
 const Range = ({ values, min, max }) => {
-  const [minValue, setMinValue] = useState(values ? values[0] : min);
-  const [maxValue, setMaxValue] = useState(
-    values ? values[values.length - 1] : max
-  );
+  const [minValue] = useState(values ? values[0] : min);
+  const [maxValue] = useState(values ? values[values.length - 1] : max);
+  const [minThumbValue, setMinThumbValue] = useState(minValue);
+  const [maxThumbValue, setMaxThumbValue] = useState(maxValue);
+
+  console.log(minValue, minThumbValue, maxThumbValue, maxValue);
 
   const sliderRef = useRef(null);
-  const minThumbRef = useRef(null);
-  const maxThumbRef = useRef(null);
+  const minThumb = useRef(null);
+  const maxThumb = useRef(null);
 
   const isDraggingMinRef = useRef(false);
   const isDraggingMaxRef = useRef(false);
 
   // update values and handle constraints
   const updateValue = () => {
-    if (values) {
-      if (minValue >= maxValue) {
-        setMinValue(maxValue);
-        isDraggingMinRef.current = false;
-      }
-      if (maxValue <= minValue) {
-        setMaxValue(minValue);
-        isDraggingMaxRef.current = false;
-      }
-    } else {
-      if (minValue >= maxValue - 1) {
-        setMinValue(maxValue - 1);
-        isDraggingMinRef.current = false;
-      }
-      if (maxValue <= minValue + 1) {
-        setMaxValue(minValue + 1);
-        isDraggingMaxRef.current = false;
-      }
+    if (minThumbValue >= maxThumbValue && minThumbValue >= min) {
+      setMinThumbValue(maxThumbValue);
+      isDraggingMinRef.current = false;
+    }
+    if (maxThumbValue <= minThumbValue && maxThumbValue <= maxValue) {
+      setMaxThumbValue(minThumbValue);
+      isDraggingMaxRef.current = false;
     }
   };
 
@@ -48,41 +39,25 @@ const Range = ({ values, min, max }) => {
       : Math.round((max - min) * (percentage / 100)) + min;
     if (values) {
       if (isDraggingMinRef.current && value < maxValue && value >= values[0]) {
-        setMinValue(value);
+        setMinThumbValue(value);
       } else if (
         isDraggingMaxRef.current &&
         value > minValue &&
         value <= values[values.length - 1]
       ) {
-        setMaxValue(value);
+        setMaxThumbValue(value);
       }
     } else {
       if (isDraggingMinRef.current && value < maxValue - 1 && value >= min) {
-        setMinValue(value);
+        setMinThumbValue(value);
       } else if (
         isDraggingMaxRef.current &&
         value > minValue + 1 &&
         value <= max
       ) {
-        setMaxValue(value);
+        setMaxThumbValue(value);
       }
     }
-  };
-
-  const updateThumbPosition = () => {
-    const trackWidth = sliderRef.current.offsetWidth;
-    const minThumbPosition =
-      ((minValue - (values ? values[0] : min)) /
-        ((values ? values[values.length - 1] : max) -
-          (values ? values[0] : min))) *
-      trackWidth;
-    const maxThumbPosition =
-      ((maxValue - (values ? values[0] : min)) /
-        ((values ? values[values.length - 1] : max) -
-          (values ? values[0] : min))) *
-      trackWidth;
-    minThumbRef.current.style.left = `${minThumbPosition}px`;
-    maxThumbRef.current.style.left = `${maxThumbPosition}px`;
   };
 
   // sets dragging off when mouse up
@@ -100,22 +75,49 @@ const Range = ({ values, min, max }) => {
     }
   };
 
+  const handleKeyDown = (event) => {
+    console.log(maxThumbValue);
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (document.activeElement === minThumb.current) {
+        setMinThumbValue((prev) => (prev > minValue ? prev - 1 : prev));
+      }
+
+      if (document.activeElement === maxThumb.current) {
+        setMaxThumbValue((prev) => (prev > minThumbValue ? prev - 1 : prev));
+      }
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      if (document.activeElement === minThumb.current) {
+        setMinThumbValue((prev) => (prev >= maxThumbValue ? prev : prev + 1));
+      }
+      if (document.activeElement === maxThumb.current) {
+        setMaxThumbValue((prev) => (prev < maxValue ? prev + 1 : prev));
+      }
+    } else if (event.key === "Backspace") {
+      if (document.activeElement.tagName === "INPUT") {
+        event.preventDefault();
+        document.activeElement.blur();
+      }
+    }
+  };
+
   // input change events
   const handleMinValueChange = (event) => {
     const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
-    if (newValue <= maxValue - 1) {
-      setMinValue(newValue);
+    if (newValue <= maxThumbValue && newValue >= minValue) {
+      setMinThumbValue(newValue);
     } else {
-      event.target.value = formatCurrency(minValue);
+      event.target.value = formatCurrency(minThumbValue);
     }
   };
 
   const handleMaxValueChange = (event) => {
     const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
-    if (newValue >= minValue + 1) {
-      setMaxValue(newValue);
+    if (newValue >= minThumbValue && newValue <= maxValue) {
+      setMaxThumbValue(newValue);
     } else {
-      event.target.value = formatCurrency(maxValue);
+      event.target.value = formatCurrency(maxThumbValue);
     }
   };
 
@@ -123,28 +125,29 @@ const Range = ({ values, min, max }) => {
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
   // to Update thumb positions and values when min/max values change
   useEffect(() => {
-    updateThumbPosition();
     updateValue();
-  }, [minValue, maxValue]);
+  }, [minThumbValue, maxThumbValue]);
 
   return (
     <div data-testid="rangeSlider" className="container">
       {values ? (
-        <span data-testid="min-value">{formatCurrency(minValue)}</span>
+        <span data-testid="min-value">{formatCurrency(minThumbValue)}</span>
       ) : (
         <input
           data-testid="min-input"
           className="value-input"
           type="text"
-          value={formatCurrency(minValue)}
+          value={formatCurrency(minThumbValue)}
           onClick={(event) => event.target.select()}
           onChange={handleMinValueChange}
         />
@@ -153,24 +156,36 @@ const Range = ({ values, min, max }) => {
         <div
           data-testid="min-thumb"
           className="slider-thumb"
-          ref={minThumbRef}
+          ref={minThumb}
+          tabIndex={0}
+          style={{
+            left: `${
+              ((minThumbValue - minValue) / (maxValue - minValue)) * 100
+            }%`,
+          }}
           onMouseDown={() => handleMouseDown(true)}
         />
         <div
           data-testid="max-thumb"
           className="slider-thumb"
-          ref={maxThumbRef}
+          ref={maxThumb}
+          tabIndex={0}
+          style={{
+            left: `${
+              ((maxThumbValue - minValue) / (maxValue - minValue)) * 100
+            }%`,
+          }}
           onMouseDown={() => handleMouseDown(false)}
         />
       </div>
       {values ? (
-        <span data-testid="max-value">{formatCurrency(maxValue)}</span>
+        <span data-testid="max-value">{formatCurrency(maxThumbValue)}</span>
       ) : (
         <input
           data-testid="max-input"
           className="value-input"
           type="text"
-          value={formatCurrency(maxValue)}
+          value={formatCurrency(maxThumbValue)}
           onClick={(event) => event.target.select()}
           onChange={handleMaxValueChange}
         />
