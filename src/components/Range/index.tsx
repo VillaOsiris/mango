@@ -1,19 +1,32 @@
-import React, { useState, useEffect, useRef } from "react";
-import { formatCurrency } from "@utils/helperFunctions.jsx";
+import React from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
+import { formatCurrency } from "@/utils/helperFunctions";
 import "./Range.css";
 
-const Range = ({ values, min, max }) => {
-  const [minValue, setMinValue] = useState(values ? values[0] : min);
-  const [maxValue, setMaxValue] = useState(
+type RangeProps =
+  | {
+      min: number;
+      max: number;
+      values?: never;
+    }
+  | {
+      min?: never;
+      max?: never;
+      values: number[];
+    };
+
+const Range = ({ values, min, max }: RangeProps) => {
+  const [minValue, setMinValue] = useState<number>(values ? values[0] : min);
+  const [maxValue, setMaxValue] = useState<number>(
     values ? values[values.length - 1] : max
   );
 
-  const sliderRef = useRef(null);
-  const minThumbRef = useRef(null);
-  const maxThumbRef = useRef(null);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
+  const minThumbRef = useRef<HTMLDivElement | null>(null);
+  const maxThumbRef = useRef<HTMLDivElement | null>(null);
 
-  const isDraggingMinRef = useRef(false);
-  const isDraggingMaxRef = useRef(false);
+  const isDraggingMinRef = useRef<boolean>(false);
+  const isDraggingMaxRef = useRef<boolean>(false);
 
   // update values and handle constraints
   const updateValue = () => {
@@ -38,8 +51,8 @@ const Range = ({ values, min, max }) => {
     }
   };
 
-  const handleMouseMove = (event) => {
-    const sliderRect = sliderRef.current.getBoundingClientRect();
+  const handleMouseMove = (event: MouseEvent) => {
+    const sliderRect = sliderRef.current!.getBoundingClientRect();
     const offsetX = event.clientX - sliderRect.left;
     const percentage = (offsetX / sliderRect.width) * 100;
 
@@ -70,19 +83,17 @@ const Range = ({ values, min, max }) => {
   };
 
   const updateThumbPosition = () => {
-    const trackWidth = sliderRef.current.offsetWidth;
+    const trackWidth = sliderRef.current!.offsetWidth;
+    const minValueRange = values ? values[0] : min;
+    const maxValueRange = values ? values[values.length - 1] : max;
     const minThumbPosition =
-      ((minValue - (values ? values[0] : min)) /
-        ((values ? values[values.length - 1] : max) -
-          (values ? values[0] : min))) *
+      ((minValue - minValueRange) / (maxValueRange - minValueRange)) *
       trackWidth;
     const maxThumbPosition =
-      ((maxValue - (values ? values[0] : min)) /
-        ((values ? values[values.length - 1] : max) -
-          (values ? values[0] : min))) *
+      ((maxValue - minValueRange) / (maxValueRange - minValueRange)) *
       trackWidth;
-    minThumbRef.current.style.left = `${minThumbPosition}px`;
-    maxThumbRef.current.style.left = `${maxThumbPosition}px`;
+    minThumbRef.current!.style.left = `${minThumbPosition}px`;
+    maxThumbRef.current!.style.left = `${maxThumbPosition}px`;
   };
 
   // sets dragging off when mouse up
@@ -92,7 +103,7 @@ const Range = ({ values, min, max }) => {
   };
 
   // ativetes dragging on mouse down
-  const handleMouseDown = (isMinThumb) => {
+  const handleMouseDown = (isMinThumb: boolean) => {
     if (isMinThumb) {
       isDraggingMinRef.current = true;
     } else {
@@ -101,7 +112,7 @@ const Range = ({ values, min, max }) => {
   };
 
   // input change events
-  const handleMinValueChange = (event) => {
+  const handleMinValueChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
     if (newValue <= maxValue - 1) {
       setMinValue(newValue);
@@ -110,7 +121,7 @@ const Range = ({ values, min, max }) => {
     }
   };
 
-  const handleMaxValueChange = (event) => {
+  const handleMaxValueChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
     if (newValue >= minValue + 1) {
       setMaxValue(newValue);
@@ -145,7 +156,7 @@ const Range = ({ values, min, max }) => {
           className="value-input"
           type="text"
           value={formatCurrency(minValue)}
-          onClick={(event) => event.target.select()}
+          onClick={(event) => event.target}
           onChange={handleMinValueChange}
         />
       )}
@@ -171,7 +182,7 @@ const Range = ({ values, min, max }) => {
           className="value-input"
           type="text"
           value={formatCurrency(maxValue)}
-          onClick={(event) => event.target.select()}
+          onClick={(event) => event.target}
           onChange={handleMaxValueChange}
         />
       )}
