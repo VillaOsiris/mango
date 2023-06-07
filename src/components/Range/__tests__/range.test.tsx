@@ -1,14 +1,8 @@
 import React from "react";
 import "@testing-library/jest-dom/extend-expect";
-import {
-  render,
-  screen,
-  fireEvent,
-  cleanup,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import Range from "../index";
-import { formatCurrency } from "@utils/helperFunctions.jsx";
+import { formatCurrency } from "@/utils/helperFunctions";
 
 describe("Range slider component", () => {
   afterEach(() => {
@@ -23,8 +17,8 @@ describe("Range slider component", () => {
     render(<Range min={1} max={100} />);
     expect(screen.getByTestId("rangeSlider")).toBeInTheDocument();
 
-    const minInputElement = screen.getByTestId("min-input");
-    const maxInputElement = screen.getByTestId("max-input");
+    const minInputElement: HTMLInputElement = screen.getByTestId("min-input");
+    const maxInputElement: HTMLInputElement = screen.getByTestId("max-input");
     expect(minInputElement.value).toBe(formatCurrency(1));
     expect(maxInputElement.value).toBe(formatCurrency(100));
   });
@@ -45,14 +39,17 @@ describe("Range slider component", () => {
    */
 
   test("should update min and max values when manually changing the input", () => {
-    const { getByTestId } = render(<Range min={0} max={100} />);
-    const minInputElement = getByTestId("min-input");
-    const maxInputElement = getByTestId("max-input");
-
-    fireEvent.change(minInputElement, { target: { value: "25" } });
+    render(<Range min={0} max={100} />);
+    const minInputElement: HTMLInputElement = screen.getByTestId("min-input");
+    const maxInputElement: HTMLInputElement = screen.getByTestId("max-input");
+    fireEvent.change(minInputElement, {
+      target: { value: formatCurrency(25) },
+    });
     expect(minInputElement.value).toBe(formatCurrency(25));
 
-    fireEvent.change(maxInputElement, { target: { value: "80" } });
+    fireEvent.change(maxInputElement, {
+      target: { value: formatCurrency(80) },
+    });
     expect(maxInputElement.value).toBe(formatCurrency(80));
   });
 
@@ -73,8 +70,8 @@ describe("Range slider component", () => {
     fireEvent.mouseMove(document, { clientX: 50 });
     fireEvent.mouseUp(minThumb);
 
-    const minInputElement = screen.getByTestId("min-input");
-    const maxInputElement = screen.getByTestId("max-input");
+    const minInputElement: HTMLInputElement = screen.getByTestId("min-input");
+    const maxInputElement: HTMLInputElement = screen.getByTestId("max-input");
     console.log(minThumb);
     expect(minInputElement.value).toBe(formatCurrency(1));
     expect(maxInputElement.value).toBe(formatCurrency(100));
