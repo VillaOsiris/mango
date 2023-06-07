@@ -8,32 +8,30 @@ const Range = ({ values, min, max }) => {
   const [minThumbValue, setMinThumbValue] = useState(minValue);
   const [maxThumbValue, setMaxThumbValue] = useState(maxValue);
 
-  console.log(minValue, minThumbValue, maxThumbValue, maxValue);
-
   const sliderRef = useRef(null);
-  const minThumb = useRef(null);
-  const maxThumb = useRef(null);
+  const minThumbRef = useRef(null);
+  const maxThumbRef = useRef(null);
+  const minInputRef = useRef(null);
+  const maxInputRef = useRef(null);
 
   const isDraggingMinRef = useRef(false);
   const isDraggingMaxRef = useRef(false);
 
-  // update values and handle constraints
+  // needed to update input defaultValue
   const updateValue = () => {
-    if (minThumbValue >= maxThumbValue && minThumbValue >= min) {
-    } else {
-      return;
-    }
-    if (maxThumbValue <= minThumbValue && maxThumbValue <= maxValue) {
-      setMaxThumbValue(minThumbValue);
+    if (!values) {
+      minInputRef.current.value = formatCurrency(minThumbValue);
+      maxInputRef.current.value = formatCurrency(maxThumbValue);
     }
   };
 
   const handleMouseMove = (event) => {
+    // Get slidebar and mouse related position in percentage
     const sliderRect = sliderRef.current.getBoundingClientRect();
     const offsetX = event.clientX - sliderRect.left;
     const percentage = (offsetX / sliderRect.width) * 100;
 
-    //Calculates values array index based on thumb position (important)
+    //Calculates values[index] based on thumb position
     const value = values
       ? values[Math.round((values.length - 1) * (percentage / 100))]
       : Math.round((max - min) * (percentage / 100)) + min;
@@ -77,24 +75,57 @@ const Range = ({ values, min, max }) => {
   };
 
   const handleKeyDown = (event) => {
-    console.log(maxThumbValue);
+    // add arrow key to inc/dec the values on focus thumb
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      if (document.activeElement === minThumb.current) {
-        setMinThumbValue((prev) => (prev > minValue ? prev - 1 : prev));
+      if (document.activeElement === minThumbRef.current) {
+        setMinThumbValue((prev) => {
+          if (values) {
+            const index = values.findIndex((value) => value === prev);
+            return values[index - 1] >= minValue ? values[index - 1] : prev;
+          } else {
+            return prev > minValue ? prev - 1 : prev;
+          }
+        });
       }
 
-      if (document.activeElement === maxThumb.current) {
-        setMaxThumbValue((prev) => (prev > minThumbValue ? prev - 1 : prev));
+      if (document.activeElement === maxThumbRef.current) {
+        setMaxThumbValue((prev) => {
+          if (values) {
+            const index = values.findIndex((value) => value === prev);
+            return values[index - 1] >= minThumbValue
+              ? values[index - 1]
+              : prev;
+          } else {
+            return prev > minThumbValue ? prev - 1 : prev;
+          }
+        });
       }
     } else if (event.key === "ArrowRight") {
       event.preventDefault();
-      if (document.activeElement === minThumb.current) {
-        setMinThumbValue((prev) => (prev >= maxThumbValue ? prev : prev + 1));
+      if (document.activeElement === minThumbRef.current) {
+        setMinThumbValue((prev) => {
+          if (values) {
+            const index = values.findIndex((value) => value === prev);
+            return values[index + 1] <= maxThumbValue
+              ? values[index + 1]
+              : prev;
+          } else {
+            return prev < maxThumbValue ? prev + 1 : prev;
+          }
+        });
       }
-      if (document.activeElement === maxThumb.current) {
-        setMaxThumbValue((prev) => (prev < maxValue ? prev + 1 : prev));
+      if (document.activeElement === maxThumbRef.current) {
+        setMaxThumbValue((prev) => {
+          if (values) {
+            const index = values.findIndex((value) => value === prev);
+            return values[index + 1] <= maxValue ? values[index + 1] : prev;
+          } else {
+            return prev < maxValue ? prev + 1 : prev;
+          }
+        });
       }
+      // edit focus input on backspace press
     } else if (event.key === "Backspace") {
       if (document.activeElement.tagName === "INPUT") {
         event.preventDefault();
@@ -154,6 +185,7 @@ const Range = ({ values, min, max }) => {
           data-testid="min-input"
           className="value-input"
           type="text"
+          ref={minInputRef}
           defaultValue={formatCurrency(minThumbValue)}
           onClick={(event) => event.target.select()}
           onKeyDown={handleMinValueChange}
@@ -163,7 +195,7 @@ const Range = ({ values, min, max }) => {
         <div
           data-testid="min-thumb"
           className="slider-thumb"
-          ref={minThumb}
+          ref={minThumbRef}
           tabIndex={0}
           style={{
             left: `${
@@ -175,7 +207,7 @@ const Range = ({ values, min, max }) => {
         <div
           data-testid="max-thumb"
           className="slider-thumb"
-          ref={maxThumb}
+          ref={maxThumbRef}
           tabIndex={0}
           style={{
             left: `${
@@ -192,6 +224,7 @@ const Range = ({ values, min, max }) => {
           data-testid="max-input"
           className="value-input"
           type="text"
+          ref={maxInputRef}
           defaultValue={formatCurrency(maxThumbValue)}
           onClick={(event) => event.target.select()}
           onKeyDown={handleMaxValueChange}
