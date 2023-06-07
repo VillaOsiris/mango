@@ -97,7 +97,7 @@ const Range = ({ values, min, max }) => {
     } else if (event.key === "Backspace") {
       if (document.activeElement.tagName === "INPUT") {
         event.preventDefault();
-        document.activeElement.blur();
+        document.activeElement.select();
       }
     }
   };
@@ -121,7 +121,7 @@ const Range = ({ values, min, max }) => {
     }
   };
 
-  // event listeners for mouse actions and clean up
+  // event listeners and clean up
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -131,9 +131,9 @@ const Range = ({ values, min, max }) => {
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [minThumbValue, maxThumbValue]);
 
-  // to Update thumb positions and values when min/max values change
+  // to Update values when min/max values change
   useEffect(() => {
     updateValue();
   }, [minThumbValue, maxThumbValue]);
