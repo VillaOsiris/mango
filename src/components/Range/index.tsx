@@ -1,33 +1,48 @@
-import React, { useState, useEffect, useRef } from "react";
-import { formatCurrency } from "@utils/helperFunctions.jsx";
+import React from "react";
+import { useState, useEffect, useRef } from "react";
+import { formatCurrency } from "@/utils/helperFunctions";
 import "./Range.css";
 
-const Range = ({ values, min, max }) => {
-  const [minValue] = useState(values ? values[0] : min);
-  const [maxValue] = useState(values ? values[values.length - 1] : max);
-  const [minThumbValue, setMinThumbValue] = useState(minValue);
-  const [maxThumbValue, setMaxThumbValue] = useState(maxValue);
+type RangeProps =
+  | {
+      min: number;
+      max: number;
+      values?: never;
+    }
+  | {
+      min?: never;
+      max?: never;
+      values: number[];
+    };
 
-  const sliderRef = useRef(null);
-  const minThumbRef = useRef(null);
-  const maxThumbRef = useRef(null);
-  const minInputRef = useRef(null);
-  const maxInputRef = useRef(null);
+const Range = ({ values, min, max }: RangeProps) => {
+  const [minValue] = useState<number>(values ? values[0] : min);
+  const [maxValue] = useState<number>(values ? values[values.length - 1] : max);
+  const [minThumbValue, setMinThumbValue] = useState<number>(minValue);
+  const [maxThumbValue, setMaxThumbValue] = useState<number>(maxValue);
 
-  const isDraggingMinRef = useRef(false);
-  const isDraggingMaxRef = useRef(false);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
+  const minThumbRef = useRef<HTMLDivElement | null>(null);
+  const maxThumbRef = useRef<HTMLDivElement | null>(null);
+  const minInputRef = useRef<HTMLInputElement | null>(null);
+  const maxInputRef = useRef<HTMLInputElement | null>(null);
+
+  const isDraggingMinRef = useRef<boolean>(false);
+  const isDraggingMaxRef = useRef<boolean>(false);
 
   // needed to update input defaultValue
   const updateValue = () => {
     if (!values) {
-      minInputRef.current.value = formatCurrency(minThumbValue);
-      maxInputRef.current.value = formatCurrency(maxThumbValue);
+      (minInputRef.current as HTMLInputElement).value =
+        formatCurrency(minThumbValue);
+      (maxInputRef.current as HTMLInputElement).value =
+        formatCurrency(maxThumbValue);
     }
   };
 
-  const handleMouseMove = (event) => {
+  const handleMouseMove = (event: MouseEvent) => {
     // Get slidebar and mouse related position in percentage
-    const sliderRect = sliderRef.current.getBoundingClientRect();
+    const sliderRect = sliderRef.current!.getBoundingClientRect();
     const offsetX = event.clientX - sliderRect.left;
     const percentage = (offsetX / sliderRect.width) * 100;
 
@@ -66,7 +81,7 @@ const Range = ({ values, min, max }) => {
   };
 
   // ativetes dragging on mouse down
-  const handleMouseDown = (isMinThumb) => {
+  const handleMouseDown = (isMinThumb: boolean) => {
     if (isMinThumb) {
       isDraggingMinRef.current = true;
     } else {
@@ -74,14 +89,14 @@ const Range = ({ values, min, max }) => {
     }
   };
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (event: KeyboardEvent) => {
     // add arrow key to inc/dec the values on focus thumb
     if (event.key === "ArrowLeft") {
       event.preventDefault();
       if (document.activeElement === minThumbRef.current) {
         setMinThumbValue((prev) => {
           if (values) {
-            const index = values.findIndex((value) => value === prev);
+            const index = values.findIndex((value: number) => value === prev);
             return values[index - 1] >= minValue ? values[index - 1] : prev;
           } else {
             return prev > minValue ? prev - 1 : prev;
@@ -92,7 +107,7 @@ const Range = ({ values, min, max }) => {
       if (document.activeElement === maxThumbRef.current) {
         setMaxThumbValue((prev) => {
           if (values) {
-            const index = values.findIndex((value) => value === prev);
+            const index = values.findIndex((value: number) => value === prev);
             return values[index - 1] >= minThumbValue
               ? values[index - 1]
               : prev;
@@ -106,7 +121,7 @@ const Range = ({ values, min, max }) => {
       if (document.activeElement === minThumbRef.current) {
         setMinThumbValue((prev) => {
           if (values) {
-            const index = values.findIndex((value) => value === prev);
+            const index = values.findIndex((value: number) => value === prev);
             return values[index + 1] <= maxThumbValue
               ? values[index + 1]
               : prev;
@@ -118,7 +133,7 @@ const Range = ({ values, min, max }) => {
       if (document.activeElement === maxThumbRef.current) {
         setMaxThumbValue((prev) => {
           if (values) {
-            const index = values.findIndex((value) => value === prev);
+            const index = values.findIndex((value: number) => value === prev);
             return values[index + 1] <= maxValue ? values[index + 1] : prev;
           } else {
             return prev < maxValue ? prev + 1 : prev;
@@ -127,34 +142,45 @@ const Range = ({ values, min, max }) => {
       }
       // edit focus input on backspace press
     } else if (event.key === "Backspace") {
-      if (document.activeElement.tagName === "INPUT") {
+      if (document.activeElement?.tagName === "INPUT") {
         event.preventDefault();
-        document.activeElement.select();
+        (document.activeElement as HTMLInputElement).select();
       }
     }
   };
 
   // input change events
-  const handleMinValueChange = (event) => {
+
+  const handleMinValueChange = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
     if (event.key === "Enter") {
-      const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
+      const newValue = Number(
+        (event.target as HTMLInputElement).value.replace(/[^0-9.-]+/g, "")
+      );
       if (newValue <= maxThumbValue && newValue >= minValue) {
         setMinThumbValue(newValue);
-        event.target.value = formatCurrency(newValue);
+        (event.target as HTMLInputElement).value = formatCurrency(newValue);
       } else {
-        event.target.value = formatCurrency(minThumbValue);
+        (event.target as HTMLInputElement).value =
+          formatCurrency(minThumbValue);
       }
     }
   };
 
-  const handleMaxValueChange = (event) => {
+  const handleMaxValueChange = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
     if (event.key === "Enter") {
-      const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
+      const newValue = Number(
+        (event.target as HTMLInputElement).value.replace(/[^0-9.-]+/g, "")
+      );
       if (newValue >= minThumbValue && newValue <= maxValue) {
         setMaxThumbValue(newValue);
-        event.target.value = formatCurrency(newValue);
+        (event.target as HTMLInputElement).value = formatCurrency(newValue);
       } else {
-        event.target.value = formatCurrency(maxThumbValue);
+        (event.target as HTMLInputElement).value =
+          formatCurrency(maxThumbValue);
       }
     }
   };
@@ -187,7 +213,7 @@ const Range = ({ values, min, max }) => {
           type="text"
           ref={minInputRef}
           defaultValue={formatCurrency(minThumbValue)}
-          onClick={(event) => event.target.select()}
+          onClick={(event) => (event.target as HTMLInputElement).select()}
           onKeyDown={handleMinValueChange}
         />
       )}
@@ -226,7 +252,7 @@ const Range = ({ values, min, max }) => {
           type="text"
           ref={maxInputRef}
           defaultValue={formatCurrency(maxThumbValue)}
-          onClick={(event) => event.target.select()}
+          onClick={(event) => (event.target as HTMLInputElement).select()}
           onKeyDown={handleMaxValueChange}
         />
       )}
