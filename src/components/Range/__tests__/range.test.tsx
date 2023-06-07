@@ -1,8 +1,15 @@
 import React from "react";
 import "@testing-library/jest-dom/extend-expect";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  waitFor,
+} from "@testing-library/react";
 import Range from "../index";
 import { formatCurrency } from "@/utils/helperFunctions";
+import { act } from "react-dom/test-utils";
 
 describe("Range slider component", () => {
   afterEach(() => {
@@ -63,7 +70,7 @@ describe("Range slider component", () => {
     const maxThumb = main.getByTestId("max-thumb");
 
     fireEvent.mouseDown(minThumb);
-    fireEvent.mouseMove(document, { clientX: -50 });
+    fireEvent.mouseMove(minThumb, { clientX: 100 });
     fireEvent.mouseUp(minThumb);
 
     fireEvent.mouseDown(maxThumb);
@@ -72,9 +79,25 @@ describe("Range slider component", () => {
 
     const minInputElement: HTMLInputElement = screen.getByTestId("min-input");
     const maxInputElement: HTMLInputElement = screen.getByTestId("max-input");
-    console.log(minThumb);
+
     expect(minInputElement.value).toBe(formatCurrency(1));
     expect(maxInputElement.value).toBe(formatCurrency(100));
+  });
+
+  /**
+   * Thumb Movement arrow key
+   */
+
+  test.only("increments min value when ArrowRight key is pressed", () => {
+    render(<Range min={1} max={100} />);
+    const minThumb = screen.getByTestId("min-thumb");
+
+    fireEvent.focus(minThumb);
+    fireEvent.keyDown(document, { key: "ArrowRight" });
+    fireEvent.keyUp(document, { key: "ArrowRight" });
+
+    const minInputElement: HTMLInputElement = screen.getByTestId("min-input");
+    expect(minInputElement.value).toBe(formatCurrency(2));
   });
 
   /**

@@ -161,9 +161,11 @@ const Range = ({ values, min, max }: RangeProps) => {
       if (newValue <= maxThumbValue && newValue >= minValue) {
         setMinThumbValue(newValue);
         (event.target as HTMLInputElement).value = formatCurrency(newValue);
+        (event.target as HTMLInputElement).select();
       } else {
         (event.target as HTMLInputElement).value =
           formatCurrency(minThumbValue);
+        (event.target as HTMLInputElement).select();
       }
     }
   };
@@ -178,9 +180,11 @@ const Range = ({ values, min, max }: RangeProps) => {
       if (newValue >= minThumbValue && newValue <= maxValue) {
         setMaxThumbValue(newValue);
         (event.target as HTMLInputElement).value = formatCurrency(newValue);
+        (event.target as HTMLInputElement).select();
       } else {
         (event.target as HTMLInputElement).value =
           formatCurrency(maxThumbValue);
+        (event.target as HTMLInputElement).select();
       }
     }
   };
