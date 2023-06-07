@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect, useRef, ChangeEvent } from "react";
+import { useState, useEffect, useRef } from "react";
 import { formatCurrency } from "@/utils/helperFunctions";
 import "./Range.css";
 
@@ -16,84 +16,62 @@ type RangeProps =
     };
 
 const Range = ({ values, min, max }: RangeProps) => {
-  const [minValue, setMinValue] = useState<number>(values ? values[0] : min);
-  const [maxValue, setMaxValue] = useState<number>(
-    values ? values[values.length - 1] : max
-  );
+  const [minValue] = useState<number>(values ? values[0] : min);
+  const [maxValue] = useState<number>(values ? values[values.length - 1] : max);
+  const [minThumbValue, setMinThumbValue] = useState<number>(minValue);
+  const [maxThumbValue, setMaxThumbValue] = useState<number>(maxValue);
 
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const minThumbRef = useRef<HTMLDivElement | null>(null);
   const maxThumbRef = useRef<HTMLDivElement | null>(null);
+  const minInputRef = useRef<HTMLInputElement | null>(null);
+  const maxInputRef = useRef<HTMLInputElement | null>(null);
 
   const isDraggingMinRef = useRef<boolean>(false);
   const isDraggingMaxRef = useRef<boolean>(false);
 
-  // update values and handle constraints
+  // needed to update input defaultValue
   const updateValue = () => {
-    if (values) {
-      if (minValue >= maxValue) {
-        setMinValue(maxValue);
-        isDraggingMinRef.current = false;
-      }
-      if (maxValue <= minValue) {
-        setMaxValue(minValue);
-        isDraggingMaxRef.current = false;
-      }
-    } else {
-      if (minValue >= maxValue - 1) {
-        setMinValue(maxValue - 1);
-        isDraggingMinRef.current = false;
-      }
-      if (maxValue <= minValue + 1) {
-        setMaxValue(minValue + 1);
-        isDraggingMaxRef.current = false;
-      }
+    if (!values) {
+      (minInputRef.current as HTMLInputElement).value =
+        formatCurrency(minThumbValue);
+      (maxInputRef.current as HTMLInputElement).value =
+        formatCurrency(maxThumbValue);
     }
   };
 
   const handleMouseMove = (event: MouseEvent) => {
+    // Get slidebar and mouse related position in percentage
     const sliderRect = sliderRef.current!.getBoundingClientRect();
     const offsetX = event.clientX - sliderRect.left;
     const percentage = (offsetX / sliderRect.width) * 100;
 
+    //Calculates values[index] based on thumb position
     const value = values
       ? values[Math.round((values.length - 1) * (percentage / 100))]
       : Math.round((max - min) * (percentage / 100)) + min;
+
     if (values) {
       if (isDraggingMinRef.current && value < maxValue && value >= values[0]) {
-        setMinValue(value);
+        setMinThumbValue(value);
       } else if (
         isDraggingMaxRef.current &&
         value > minValue &&
         value <= values[values.length - 1]
       ) {
-        setMaxValue(value);
+        setMaxThumbValue(value);
       }
     } else {
-      if (isDraggingMinRef.current && value < maxValue - 1 && value >= min) {
-        setMinValue(value);
+      if (isDraggingMinRef.current && value <= maxThumbValue && value >= min) {
+        setMinThumbValue(value);
       } else if (
         isDraggingMaxRef.current &&
-        value > minValue + 1 &&
+        value >= minThumbValue &&
         value <= max
       ) {
-        setMaxValue(value);
+        setMaxThumbValue(value);
       }
     }
-  };
-
-  const updateThumbPosition = () => {
-    const trackWidth = sliderRef.current!.offsetWidth;
-    const minValueRange = values ? values[0] : min;
-    const maxValueRange = values ? values[values.length - 1] : max;
-    const minThumbPosition =
-      ((minValue - minValueRange) / (maxValueRange - minValueRange)) *
-      trackWidth;
-    const maxThumbPosition =
-      ((maxValue - minValueRange) / (maxValueRange - minValueRange)) *
-      trackWidth;
-    minThumbRef.current!.style.left = `${minThumbPosition}px`;
-    maxThumbRef.current!.style.left = `${maxThumbPosition}px`;
   };
 
   // sets dragging off when mouse up
@@ -111,53 +89,132 @@ const Range = ({ values, min, max }: RangeProps) => {
     }
   };
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    // add arrow key to inc/dec the values on focus thumb
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (document.activeElement === minThumbRef.current) {
+        setMinThumbValue((prev) => {
+          if (values) {
+            const index = values.findIndex((value: number) => value === prev);
+            return values[index - 1] >= minValue ? values[index - 1] : prev;
+          } else {
+            return prev > minValue ? prev - 1 : prev;
+          }
+        });
+      }
+
+      if (document.activeElement === maxThumbRef.current) {
+        setMaxThumbValue((prev) => {
+          if (values) {
+            const index = values.findIndex((value: number) => value === prev);
+            return values[index - 1] >= minThumbValue
+              ? values[index - 1]
+              : prev;
+          } else {
+            return prev > minThumbValue ? prev - 1 : prev;
+          }
+        });
+      }
+    } else if (event.key === "ArrowRight") {
+      event.preventDefault();
+      if (document.activeElement === minThumbRef.current) {
+        setMinThumbValue((prev) => {
+          if (values) {
+            const index = values.findIndex((value: number) => value === prev);
+            return values[index + 1] <= maxThumbValue
+              ? values[index + 1]
+              : prev;
+          } else {
+            return prev < maxThumbValue ? prev + 1 : prev;
+          }
+        });
+      }
+      if (document.activeElement === maxThumbRef.current) {
+        setMaxThumbValue((prev) => {
+          if (values) {
+            const index = values.findIndex((value: number) => value === prev);
+            return values[index + 1] <= maxValue ? values[index + 1] : prev;
+          } else {
+            return prev < maxValue ? prev + 1 : prev;
+          }
+        });
+      }
+      // edit focus input on backspace press
+    } else if (event.key === "Backspace") {
+      if (document.activeElement?.tagName === "INPUT") {
+        event.preventDefault();
+        (document.activeElement as HTMLInputElement).select();
+      }
+    }
+  };
+
   // input change events
-  const handleMinValueChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
-    if (newValue <= maxValue - 1) {
-      setMinValue(newValue);
-    } else {
-      event.target.value = formatCurrency(minValue);
+
+  const handleMinValueChange = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === "Enter") {
+      const newValue = Number(
+        (event.target as HTMLInputElement).value.replace(/[^0-9.-]+/g, "")
+      );
+      if (newValue <= maxThumbValue && newValue >= minValue) {
+        setMinThumbValue(newValue);
+        (event.target as HTMLInputElement).value = formatCurrency(newValue);
+      } else {
+        (event.target as HTMLInputElement).value =
+          formatCurrency(minThumbValue);
+      }
     }
   };
 
-  const handleMaxValueChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
-    if (newValue >= minValue + 1) {
-      setMaxValue(newValue);
-    } else {
-      event.target.value = formatCurrency(maxValue);
+  const handleMaxValueChange = (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === "Enter") {
+      const newValue = Number(
+        (event.target as HTMLInputElement).value.replace(/[^0-9.-]+/g, "")
+      );
+      if (newValue >= minThumbValue && newValue <= maxValue) {
+        setMaxThumbValue(newValue);
+        (event.target as HTMLInputElement).value = formatCurrency(newValue);
+      } else {
+        (event.target as HTMLInputElement).value =
+          formatCurrency(maxThumbValue);
+      }
     }
   };
 
-  // event listeners for mouse actions and clean up
+  // event listeners and clean up
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [minThumbValue, maxThumbValue]);
 
-  // to Update thumb positions and values when min/max values change
+  // to Update values when min/max values change
   useEffect(() => {
-    updateThumbPosition();
     updateValue();
-  }, [minValue, maxValue]);
+  }, [minThumbValue, maxThumbValue]);
 
   return (
     <div data-testid="rangeSlider" className="container">
       {values ? (
-        <span data-testid="min-value">{formatCurrency(minValue)}</span>
+        <span data-testid="min-value">{formatCurrency(minThumbValue)}</span>
       ) : (
         <input
           data-testid="min-input"
           className="value-input"
           type="text"
-          value={formatCurrency(minValue)}
-          onClick={(event) => event.target}
-          onChange={handleMinValueChange}
+          ref={minInputRef}
+          defaultValue={formatCurrency(minThumbValue)}
+          onClick={(event) => (event.target as HTMLInputElement).select()}
+          onKeyDown={handleMinValueChange}
         />
       )}
       <div data-testid="slider-track" className="slider" ref={sliderRef}>
@@ -165,25 +222,38 @@ const Range = ({ values, min, max }: RangeProps) => {
           data-testid="min-thumb"
           className="slider-thumb"
           ref={minThumbRef}
+          tabIndex={0}
+          style={{
+            left: `${
+              ((minThumbValue - minValue) / (maxValue - minValue)) * 100
+            }%`,
+          }}
           onMouseDown={() => handleMouseDown(true)}
         />
         <div
           data-testid="max-thumb"
           className="slider-thumb"
           ref={maxThumbRef}
+          tabIndex={0}
+          style={{
+            left: `${
+              ((maxThumbValue - minValue) / (maxValue - minValue)) * 100
+            }%`,
+          }}
           onMouseDown={() => handleMouseDown(false)}
         />
       </div>
       {values ? (
-        <span data-testid="max-value">{formatCurrency(maxValue)}</span>
+        <span data-testid="max-value">{formatCurrency(maxThumbValue)}</span>
       ) : (
         <input
           data-testid="max-input"
           className="value-input"
           type="text"
-          value={formatCurrency(maxValue)}
-          onClick={(event) => event.target}
-          onChange={handleMaxValueChange}
+          ref={maxInputRef}
+          defaultValue={formatCurrency(maxThumbValue)}
+          onClick={(event) => (event.target as HTMLInputElement).select()}
+          onKeyDown={handleMaxValueChange}
         />
       )}
     </div>
