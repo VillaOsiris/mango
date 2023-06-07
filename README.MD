@@ -1,8 +1,9 @@
 # Custom Range Slider Component
 
-A custom range slider component built.
+A custom range slider component build.
 
 - **React**: [React](https://reactjs.org/)
+- **Typescript**: [Typescript](https://typescriptlang.org//)
 - **Testing**: [Jest](https://jestjs.io/)
 
 ## Table of Contents
@@ -19,14 +20,15 @@ The Custom Range Slider Component is a React-based slider component with two fuc
 
 ## Dependencies
 
-The project has the following dependencies:
+The project has the following core dependencies:
 
-- `@babel/core`: (^7.21.8)
-- `jest`: (^29.5.0")
-- `react-router-dom`: (^6.11.2)
 - `webpack` (version 5.84.0)
+- `@babel/core`: (^7.21.8)
+- `react`: (^18.2.0),
+- `typescript`: (^5.0.4),
+- `jest`: (^29.5.0)
 
-Note: Complete list of dependencies is located in the project's `devDependencies` section of the `package.json` file.
+[Note:] Complete list of dependencies is located in the project's `devDependencies` section of the `package.json` file.
 
 ## Installation
 
@@ -49,7 +51,7 @@ To use the Custom Range Slider Component in your project, follow these steps:
 2. Use the Range component in your JSX:
 
 - <Range min={1} max={100} "OR" values={[100,200,300,400]}/>
-  // Replace the min/max or values, with your desired values.
+  [Note:] Replace the min/max or values, with your desired values.
 
 3. Style the slider using plain CSS. You can customize the appearance by modifying the CSS classes provided in `Range.css` inside the `/components/Range` folder.
 
@@ -59,8 +61,32 @@ To use the Custom Range Slider Component in your project, follow these steps:
 
 1. Starts dev server on `http://localhost:8080/`
 
-- npm start
+- `npm start`
 
 2. Starts testing
 
-- npm test
+- `npm test`
+
+## Production Mode
+
+To run the application in production mode, follow the steps below:
+
+1. Install all dependencies
+
+- `npm install`
+
+2. Compile application
+
+- `npm run build`
+
+[Note:] This command will generate an optimized and production-ready version in the `build` folder.
+
+3. Serve the application on a web server.
+
+- `npm install serve`
+
+Navigate to the build folder:
+
+- `serve`
+
+4. Congratulations! The application is now running in production mode.
