@@ -20,12 +20,11 @@ const Range = ({ values, min, max }) => {
   // update values and handle constraints
   const updateValue = () => {
     if (minThumbValue >= maxThumbValue && minThumbValue >= min) {
-      setMinThumbValue(maxThumbValue);
-      isDraggingMinRef.current = false;
+    } else {
+      return;
     }
     if (maxThumbValue <= minThumbValue && maxThumbValue <= maxValue) {
       setMaxThumbValue(minThumbValue);
-      isDraggingMaxRef.current = false;
     }
   };
 
@@ -34,9 +33,11 @@ const Range = ({ values, min, max }) => {
     const offsetX = event.clientX - sliderRect.left;
     const percentage = (offsetX / sliderRect.width) * 100;
 
+    //Calculates values array index based on thumb position (important)
     const value = values
       ? values[Math.round((values.length - 1) * (percentage / 100))]
       : Math.round((max - min) * (percentage / 100)) + min;
+
     if (values) {
       if (isDraggingMinRef.current && value < maxValue && value >= values[0]) {
         setMinThumbValue(value);
@@ -48,11 +49,11 @@ const Range = ({ values, min, max }) => {
         setMaxThumbValue(value);
       }
     } else {
-      if (isDraggingMinRef.current && value < maxValue - 1 && value >= min) {
+      if (isDraggingMinRef.current && value <= maxThumbValue && value >= min) {
         setMinThumbValue(value);
       } else if (
         isDraggingMaxRef.current &&
-        value > minValue + 1 &&
+        value >= minThumbValue &&
         value <= max
       ) {
         setMaxThumbValue(value);
@@ -104,20 +105,26 @@ const Range = ({ values, min, max }) => {
 
   // input change events
   const handleMinValueChange = (event) => {
-    const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
-    if (newValue <= maxThumbValue && newValue >= minValue) {
-      setMinThumbValue(newValue);
-    } else {
-      event.target.value = formatCurrency(minThumbValue);
+    if (event.key === "Enter") {
+      const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
+      if (newValue <= maxThumbValue && newValue >= minValue) {
+        setMinThumbValue(newValue);
+        event.target.value = formatCurrency(newValue);
+      } else {
+        event.target.value = formatCurrency(minThumbValue);
+      }
     }
   };
 
   const handleMaxValueChange = (event) => {
-    const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
-    if (newValue >= minThumbValue && newValue <= maxValue) {
-      setMaxThumbValue(newValue);
-    } else {
-      event.target.value = formatCurrency(maxThumbValue);
+    if (event.key === "Enter") {
+      const newValue = Number(event.target.value.replace(/[^0-9.-]+/g, ""));
+      if (newValue >= minThumbValue && newValue <= maxValue) {
+        setMaxThumbValue(newValue);
+        event.target.value = formatCurrency(newValue);
+      } else {
+        event.target.value = formatCurrency(maxThumbValue);
+      }
     }
   };
 
@@ -147,9 +154,9 @@ const Range = ({ values, min, max }) => {
           data-testid="min-input"
           className="value-input"
           type="text"
-          value={formatCurrency(minThumbValue)}
+          defaultValue={formatCurrency(minThumbValue)}
           onClick={(event) => event.target.select()}
-          onChange={handleMinValueChange}
+          onKeyDown={handleMinValueChange}
         />
       )}
       <div data-testid="slider-track" className="slider" ref={sliderRef}>
@@ -185,9 +192,9 @@ const Range = ({ values, min, max }) => {
           data-testid="max-input"
           className="value-input"
           type="text"
-          value={formatCurrency(maxThumbValue)}
+          defaultValue={formatCurrency(maxThumbValue)}
           onClick={(event) => event.target.select()}
-          onChange={handleMaxValueChange}
+          onKeyDown={handleMaxValueChange}
         />
       )}
     </div>
