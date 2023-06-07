@@ -56,7 +56,7 @@ const Range = ({ values, min, max }: RangeProps) => {
         setMinThumbValue(value);
       } else if (
         isDraggingMaxRef.current &&
-        value > minValue &&
+        value >= minThumbValue &&
         value <= values[values.length - 1]
       ) {
         setMaxThumbValue(value);
