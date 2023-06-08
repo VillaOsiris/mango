@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect, useRef } from "react";
-import { formatCurrency } from "@/utils/helperFunctions";
+import { formatCurrency, isAscending } from "@/utils/helperFunctions";
 import "./Range.css";
 
 type RangeProps =
@@ -16,6 +16,18 @@ type RangeProps =
     };
 
 const Range = ({ values, min, max }: RangeProps) => {
+  if (min !== undefined && max !== undefined && min > max) {
+    throw new Error(
+      "Invalid min and max values. Min value must be smaller than max value."
+    );
+  }
+
+  if (values !== undefined && !isAscending(values)) {
+    throw new Error(
+      "Invalid values array. The values must be in ascending order."
+    );
+  }
+
   const [minValue] = useState<number>(values ? values[0] : min);
   const [maxValue] = useState<number>(values ? values[values.length - 1] : max);
   const [minThumbValue, setMinThumbValue] = useState<number>(minValue);
