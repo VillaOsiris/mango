@@ -6,8 +6,26 @@ import useFetch from "@/utils/useFetch";
 //Mock API
 const APIEndpoint: string = "http://demo8880427.mockable.io/mockrange";
 
+type RangeProps =
+  | {
+      min: number;
+      max: number;
+      values?: never;
+    }
+  | {
+      min?: never;
+      max?: never;
+      values: number[];
+    };
+
 function App() {
   const { data, error, loading } = useFetch(APIEndpoint);
+
+  const dataIsValid = (data: RangeProps) => {
+    typeof data === "object" &&
+      ((data.hasOwnProperty(`min`) && data.hasOwnProperty(`max`)) ||
+        data.hasOwnProperty("rangeValues"));
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -15,6 +33,10 @@ function App() {
 
   if (error) {
     return <div>Error: {error.message}</div>;
+  }
+
+  if (!dataIsValid) {
+    return <div>Error: Invalid data format</div>;
   }
 
   return (
