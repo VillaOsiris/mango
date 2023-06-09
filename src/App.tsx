@@ -1,40 +1,31 @@
 import React from "react";
+import "./App.css";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Range from "@/components/Range";
 import useFetch from "@/utils/useFetch";
+import { isDataValid } from "@/utils/helperFunctions";
 import { APIEndpoint } from "./constants/urls";
 
-type RangeProps =
-  | {
-      min: number;
-      max: number;
-      values?: never;
-    }
-  | {
-      min?: never;
-      max?: never;
-      values: number[];
-    };
-
 function App() {
-  const { data, error, loading } = useFetch(APIEndpoint);
-
-  const dataIsValid = (data: RangeProps) => {
-    typeof data === "object" &&
-      ((data.hasOwnProperty(`min`) && data.hasOwnProperty(`max`)) ||
-        data.hasOwnProperty("rangeValues"));
-  };
+  const { data, error, loading } = useFetch(APIEndpoint, isDataValid);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="centered">
+        <div className="spinner"></div>
+        <div>Loading...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
-  if (!dataIsValid) {
-    return <div>Error: Invalid data format</div>;
+    return (
+      <div className="centered">
+        <div>Oops! Something went wrong.</div>
+        <br />
+        <div className="error">Error: {error.message}</div>
+      </div>
+    );
   }
 
   return (

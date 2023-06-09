@@ -1,0 +1,41 @@
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: lightgray;
+  height: 100vh;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  animation: spin 1s infinite linear;
+  background: linear-gradient(135deg, #ff00cc, #00ccff);
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+  animation-iteration-count: infinite;
+}
+
+.error {
+  background-color: #d41d26;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 5px 15px;
+  font-family: monospace;
+}
+
+@keyframes spin {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

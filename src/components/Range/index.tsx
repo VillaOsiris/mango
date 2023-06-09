@@ -17,14 +17,20 @@ type RangeProps =
 
 const Range = ({ values, min, max }: RangeProps) => {
   if (min !== undefined && max !== undefined && min > max) {
-    throw new Error(
-      "Invalid min and max values. Min value must be smaller than max value."
+    return (
+      <div className="centered">
+        <h2>Invalid min and max values.</h2>
+        <p>"Min value must be smaller than max value."</p>
+      </div>
     );
   }
 
   if (values !== undefined && !isAscending(values)) {
-    throw new Error(
-      "Invalid values array. The values must be in ascending order."
+    return (
+      <div className="centered">
+        <h2>Invalid values array.</h2>
+        <p>"Array values must be in ascending order."</p>
+      </div>
     );
   }
 

@@ -15,3 +15,11 @@ export const isAscending = (arr: number[]) => {
   }
   return true;
 };
+
+export const isDataValid = (data: any) => {
+  return (
+    typeof data === "object" &&
+    ((data.hasOwnProperty("min") && data.hasOwnProperty("max")) ||
+      data.hasOwnProperty("values"))
+  );
+};

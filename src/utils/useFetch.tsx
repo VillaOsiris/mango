@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const useFetch = (url: string) => {
+const useFetch = (url: string, validation: (data: any) => boolean) => {
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -10,7 +10,12 @@ const useFetch = (url: string) => {
       try {
         const response = await fetch(url);
         const responseData = await response.json();
-        setData(responseData);
+
+        if (validation(responseData)) {
+          setData(responseData);
+        } else {
+          throw new Error("The fetched data is not in the expected format.");
+        }
       } catch (error) {
         setError(error);
       } finally {
