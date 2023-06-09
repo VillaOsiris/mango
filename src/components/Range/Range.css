@@ -26,6 +26,10 @@
   transform: translate(-50%, -50%);
 }
 
+.slider-thumb:focus {
+  outline: 3px solid #5e9ed6;
+  outline-offset: 3px;
+}
 .slider-thumb:hover {
   scale: 1.2;
 }
@@ -47,6 +51,12 @@
   cursor: pointer;
   appearance: textfield;
   width: 40px;
+}
+
+.value-input:focus {
+  outline: 2px solid #333;
+  outline-offset: 2px;
+  border-radius: 1px;
 }
 
 .value-input::-webkit-inner-spin-button,

@@ -221,9 +221,13 @@ const Range = ({ values, min, max }: RangeProps) => {
   return (
     <div data-testid="rangeSlider" className="container">
       {values ? (
-        <span data-testid="min-value">{formatCurrency(minThumbValue)}</span>
+        <span title="Maximum Value" data-testid="min-value">
+          {formatCurrency(minThumbValue)}
+        </span>
       ) : (
         <input
+          title="Minimum Value Input"
+          aria-label="Minimum Value Input"
           data-testid="min-input"
           className="value-input"
           type="text"
@@ -235,6 +239,8 @@ const Range = ({ values, min, max }: RangeProps) => {
       )}
       <div data-testid="slider-track" className="slider" ref={sliderRef}>
         <div
+          title="Minimum Thumb"
+          aria-label="Minimum Thumb"
           data-testid="min-thumb"
           className="slider-thumb"
           ref={minThumbRef}
@@ -247,6 +253,8 @@ const Range = ({ values, min, max }: RangeProps) => {
           onMouseDown={() => handleMouseDown(true)}
         />
         <div
+          title="Maximum Thumb"
+          aria-label="Maximum Thumb"
           data-testid="max-thumb"
           className="slider-thumb"
           ref={maxThumbRef}
@@ -260,9 +268,13 @@ const Range = ({ values, min, max }: RangeProps) => {
         />
       </div>
       {values ? (
-        <span data-testid="max-value">{formatCurrency(maxThumbValue)}</span>
+        <span title="Maximum Value" data-testid="max-value">
+          {formatCurrency(maxThumbValue)}
+        </span>
       ) : (
         <input
+          title="Maximum Value Input"
+          aria-label="Maximum Value Input"
           data-testid="max-input"
           className="value-input"
           type="text"
