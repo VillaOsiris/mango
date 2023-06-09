@@ -202,10 +202,8 @@ const useRange = ({ values, min, max }: RangeProps) => {
   // to Update values when min/max values change
   useEffect(() => {
     if (!values) {
-      (minInputRef.current as HTMLInputElement).value =
-        formatCurrency(minThumbValue);
-      (maxInputRef.current as HTMLInputElement).value =
-        formatCurrency(maxThumbValue);
+      minInputRef.current!.value = formatCurrency(minThumbValue);
+      maxInputRef.current!.value = formatCurrency(maxThumbValue);
     }
   }, [minThumbValue, maxThumbValue]);
 

@@ -21,13 +21,12 @@ describe("Range slider component", () => {
   });
 
   test("throws error when min is greater than max", () => {
-    const renderRangeWithInvalidValues = () => {
-      render(<Range min={100} max={50} />);
-    };
-
-    expect(renderRangeWithInvalidValues).toThrow(
-      "Invalid min and max values. Min value must be smaller than max value."
+    render(<Range min={100} max={50} />);
+    const errorMessage = screen.getByText(
+      "Invalid Minimum and Maximum values."
     );
+
+    expect(errorMessage).toBeInTheDocument();
   });
 
   /**
@@ -45,13 +44,10 @@ describe("Range slider component", () => {
   });
 
   test("throws error when values array is not in ascending order", () => {
-    const renderRangeWithInvalidValues = () => {
-      render(<Range values={[100, 300, 200, 400]} />);
-    };
+    render(<Range values={[100, 300, 200, 400]} />);
+    const errorMessage = screen.getByText("Invalid value range.");
 
-    expect(renderRangeWithInvalidValues).toThrow(
-      "Invalid values array. The values must be in ascending order."
-    );
+    expect(errorMessage).toBeInTheDocument();
   });
 
   /**
@@ -77,7 +73,7 @@ describe("Range slider component", () => {
    * Thumb Movement arrow keys
    */
 
-  test("increments min value when ArrowRight key is pressed", () => {
+  test("increments value when ArrowRight key is pressed", () => {
     render(<Range min={1} max={100} />);
 
     const minInput = screen.getByTestId("min-input");
@@ -98,7 +94,7 @@ describe("Range slider component", () => {
     fireEvent.keyUp(document, { key: "ArrowRight" });
   });
 
-  test("decrements min value when ArrowLeft key is pressed", () => {
+  test("decrements value when ArrowLeft key is pressed", () => {
     render(<Range min={1} max={100} />);
 
     const maxInput = screen.getByTestId("max-input");
@@ -123,11 +119,16 @@ describe("Range slider component", () => {
     render(<Range min={1} max={100} />);
     const maxInput = screen.getByTestId("max-input");
     const maxThumb = screen.getByTestId("max-thumb");
-    maxInput.value = formatCurrency(80);
+
+    act(() => {
+      fireEvent.change(maxInput, { target: { value: formatCurrency(80) } });
+      fireEvent.focus(maxThumb);
+    });
 
     maxThumb.focus();
     for (let i = 1; i <= 110; i++) {
       fireEvent.keyDown(document, { key: "ArrowRight" });
+
       console.log(maxInput.value);
 
       if (i === 10 || i === 50 || i === 90) {
@@ -258,5 +259,35 @@ test("handles backspace key press", () => {
   minInput.focus();
   fireEvent.keyDown(minInput, { key: "Backspace" });
 
-  expect(minInput.select()).toHaveBeenCalledTimes(1);
+  expect(minInput.selectionStart).toBe(0);
+});
+
+test("handles arrow key press (ArrowLeft and ArrowRight)", () => {
+  render(<Range min={1} max={100} />);
+  const minInput = screen.getByTestId("min-input");
+  const maxInput = screen.getByTestId("max-input");
+
+  // Change the input values to 25 and 80
+  fireEvent.change(minInput, { target: { value: "25" } });
+  fireEvent.change(maxInput, { target: { value: "80" } });
+
+  // Simulate ArrowLeft key press on min input
+  fireEvent.keyDown(minInput, { key: "ArrowLeft" });
+
+  expect(minInput.value).toBe("24"); // Check the updated value
+
+  // Simulate ArrowRight key press on min input
+  fireEvent.keyDown(minInput, { key: "ArrowRight" });
+
+  expect(minInput.value).toBe("25"); // Check the updated value
+
+  // Simulate ArrowLeft key press on max input
+  fireEvent.keyDown(maxInput, { key: "ArrowLeft" });
+
+  expect(maxInput.value).toBe("79"); // Check the updated value
+
+  // Simulate ArrowRight key press on max input
+  fireEvent.keyDown(maxInput, { key: "ArrowRight" });
+
+  expect(maxInput.value).toBe("80"); // Check the updated value
 });

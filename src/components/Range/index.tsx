@@ -16,6 +16,24 @@ type RangeProps =
     };
 
 const Range = ({ values, min, max }: RangeProps) => {
+  if (min !== undefined && max !== undefined && min > max) {
+    return (
+      <div className="centered">
+        <h2>Invalid Minimum and Maximum values.</h2>
+        <p>"Minimum value must be smaller than maximum value."</p>
+      </div>
+    );
+  }
+
+  if (values !== undefined && !isAscending(values)) {
+    return (
+      <div className="centered">
+        <h2>Invalid value range.</h2>
+        <p>"Range of values must be in ascending order."</p>
+      </div>
+    );
+  }
+
   const {
     minValue,
     maxValue,
@@ -30,24 +48,6 @@ const Range = ({ values, min, max }: RangeProps) => {
     handleMinValueChange,
     handleMaxValueChange,
   } = useRange(values ? { values } : { min, max });
-
-  if (min !== undefined && max !== undefined && min > max) {
-    return (
-      <div className="centered">
-        <h2>Invalid min and max values.</h2>
-        <p>"Min value must be smaller than max value."</p>
-      </div>
-    );
-  }
-
-  if (values !== undefined && !isAscending(values)) {
-    return (
-      <div className="centered">
-        <h2>Invalid values array.</h2>
-        <p>"Array values must be in ascending order."</p>
-      </div>
-    );
-  }
 
   return (
     <div data-testid="rangeSlider" className="container">
