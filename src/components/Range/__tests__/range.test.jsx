@@ -54,19 +54,34 @@ describe("Range slider component", () => {
    * Setting values Manually on the inputs
    */
 
-  test("should update min and max values when manually changing the input", () => {
-    render(<Range min={1} max={100} />);
-    const minInput = screen.getByTestId("min-input");
-    const maxInput = screen.getByTestId("max-input");
-    fireEvent.change(minInput, {
-      target: { value: formatCurrency(25) },
-    });
-    expect(minInput).toHaveValue(formatCurrency(25));
+  test("updates the minThumbValue when changing the minimum value input", () => {
+    const { getByTestId } = render(<Range min={0} max={100} />);
+    const minInput = getByTestId("min-input");
 
-    fireEvent.change(maxInput, {
-      target: { value: formatCurrency(80) },
-    });
-    expect(maxInput).toHaveValue(formatCurrency(80));
+    fireEvent.click(minInput);
+    fireEvent.change(minInput, { target: { value: "25" } });
+    fireEvent.keyDown(minInput, { key: "Enter" });
+    expect(minInput.value).toBe(formatCurrency(25));
+  });
+
+  test("updates the maxThumbValue when changing the maximum value input", () => {
+    const { getByTestId } = render(<Range min={0} max={100} />);
+    const maxInput = getByTestId("max-input");
+
+    fireEvent.click(maxInput);
+    fireEvent.change(maxInput, { target: { value: "75" } });
+    fireEvent.keyDown(maxInput, { key: "Enter" });
+    expect(maxInput.value).toBe(formatCurrency(75));
+  });
+
+  test("Doesn't updates the minInputValue when minimum value out of range", () => {
+    const { getByTestId } = render(<Range min={0} max={100} />);
+    const minInput = getByTestId("min-input");
+
+    fireEvent.click(minInput);
+    fireEvent.change(minInput, { target: { value: "125" } });
+    fireEvent.keyDown(minInput, { key: "Enter" });
+    expect(minInput.value).toBe(formatCurrency(0));
   });
 
   /**
@@ -94,6 +109,24 @@ describe("Range slider component", () => {
     fireEvent.keyUp(document, { key: "ArrowRight" });
   });
 
+  test("increments value when ArrowRight key is pressed on exercise 2", () => {
+    render(<Range values={[100, 200, 300, 400]} />);
+
+    const minSpan = screen.getByTestId("min-value");
+    const minThumb = screen.getByTestId("min-thumb");
+
+    minThumb.focus();
+    for (let i = 1; i <= 3; i++) {
+      fireEvent.keyDown(document, { key: "ArrowRight" });
+      if (i === 1) {
+        expect(minSpan).toHaveTextContent(200);
+      }
+      if (i === 2) {
+        expect(minSpan).toHaveTextContent(300);
+      }
+    }
+  });
+
   test("decrements value when ArrowLeft key is pressed", () => {
     render(<Range min={1} max={100} />);
 
@@ -113,6 +146,24 @@ describe("Range slider component", () => {
       }
     }
     fireEvent.keyUp(document, { key: "ArrowLeft" });
+  });
+
+  test("decrements value when ArrowLeft key is pressed on exercise 2", () => {
+    render(<Range values={[100, 200, 300, 400]} />);
+
+    const maxSpan = screen.getByTestId("max-value");
+    const maxThumb = screen.getByTestId("max-thumb");
+
+    maxThumb.focus();
+    for (let i = 1; i <= 3; i++) {
+      fireEvent.keyDown(document, { key: "ArrowLeft" });
+      if (i === 1) {
+        expect(maxSpan).toHaveTextContent(300);
+      }
+      if (i === 2) {
+        expect(maxSpan).toHaveTextContent(200);
+      }
+    }
   });
 
   /**
