@@ -131,11 +131,6 @@ const useRange = ({ values, min, max }: RangeProps) => {
         });
       }
       // edit focus input on backspace press
-    } else if (event.key === "Backspace") {
-      if (document.activeElement?.tagName === "INPUT") {
-        event.preventDefault();
-        (document.activeElement as HTMLInputElement).select();
-      }
     }
   };
 
@@ -144,8 +139,8 @@ const useRange = ({ values, min, max }: RangeProps) => {
   const handleMinValueChange = (
     event: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    const isNumberKey = /^\d$/.test(event.key); //we dont want letter here
-    if (!isNumberKey) {
+    const isLetterKey = /^[a-zA-Z]$/.test(event.key); //we dont want letter here, care with special keys like tab
+    if (isLetterKey) {
       event.preventDefault();
     }
     if (event.key === "Enter") {
@@ -167,8 +162,8 @@ const useRange = ({ values, min, max }: RangeProps) => {
   const handleMaxValueChange = (
     event: React.KeyboardEvent<HTMLInputElement>
   ) => {
-    const isNumberKey = /^\d$/.test(event.key); //we dont want letter here
-    if (!isNumberKey) {
+    const isLetterKey = /^[a-zA-Z]$/.test(event.key); //we dont want letter here, care with special keys like tab
+    if (isLetterKey) {
       event.preventDefault();
     }
     if (event.key === "Enter") {
@@ -178,11 +173,11 @@ const useRange = ({ values, min, max }: RangeProps) => {
       if (newValue >= minThumbValue && newValue <= maxValue) {
         setMaxThumbValue(newValue);
         (event.target as HTMLInputElement).value = formatCurrency(newValue);
-        (event.target as HTMLInputElement).select();
+        //
       } else {
         (event.target as HTMLInputElement).value =
           formatCurrency(maxThumbValue);
-        (event.target as HTMLInputElement).select();
+        // (event.target as HTMLInputElement).select();
       }
     }
   };
