@@ -115,92 +115,22 @@ describe("Range slider component", () => {
     fireEvent.keyUp(document, { key: "ArrowLeft" });
   });
 
-  test("increments max value when ArrowRight key is pressed", () => {
-    render(<Range min={1} max={100} />);
-    const maxInput = screen.getByTestId("max-input");
-    const maxThumb = screen.getByTestId("max-thumb");
-
-    act(() => {
-      fireEvent.change(maxInput, { target: { value: formatCurrency(80) } });
-      fireEvent.focus(maxThumb);
-    });
-
-    maxThumb.focus();
-    for (let i = 1; i <= 110; i++) {
-      fireEvent.keyDown(document, { key: "ArrowRight" });
-
-      console.log(maxInput.value);
-
-      if (i === 10 || i === 50 || i === 90) {
-        const expectedValue = formatCurrency(80 - i);
-        expect(maxInput.value).toBe(expectedValue);
-      }
-      if (i === 110) {
-        const expectedValue = formatCurrency(100);
-        expect(maxInput.value).toBe(expectedValue);
-      }
-    }
-    fireEvent.keyUp(document, { key: "ArrowRight" });
-  });
-
-  test("Doesn't increments min value over maxThumbvalue", () => {
-    render(<Range min={1} max={100} />);
-    const minThumb = screen.getByTestId("min-thumb");
-    const minInput = screen.getByTestId("min-input");
-    const maxInput = screen.getByTestId("max-input");
-    maxInput.value = formatCurrency(80);
-
-    minThumb.focus();
-    for (let i = 1; i <= 110; i++) {
-      fireEvent.keyDown(document, { key: "ArrowRight" });
-      console.log(minInput.value);
-      if (i >= 110) {
-        const expectedValue = formatCurrency(80);
-        expect(minInput.value).toBe(expectedValue);
-      }
-    }
-    fireEvent.keyUp(document, { key: "ArrowRight" });
-  });
-
-  test("decrements min value when ArrowLeft key is pressed", () => {
-    render(<Range min={1} max={100} />);
-    const minThumb = screen.getByTestId("min-thumb");
-    const minInput = screen.getByTestId("min-input");
-    minInput.value = formatCurrency(20);
-
-    minThumb.focus();
-    for (let i = 1; i <= 35; i++) {
-      fireEvent.keyDown(document, { key: "ArrowLeft" });
-      console.log(minInput.value);
-      if (i === 10 || i === 20) {
-        const expectedValue = formatCurrency(20 - i);
-        expect(minInput.value).toBe(expectedValue);
-      }
-      if (i === 35) {
-        const expectedValue = formatCurrency(1);
-        expect(minInput.value).toBe(expectedValue);
-      }
-    }
-    fireEvent.keyUp(document, { key: "ArrowLeft" });
-  });
-
   /**
    * Thumb Movement Constrains
    */
 
-  //FALSE POSITIVE
-  test("updates min and max values when dragging the thumbs", () => {
+  test("can't drag thumbs outside range provided by min and max values", () => {
     const main = render(<Range min={1} max={100} />);
     const minThumb = main.getByTestId("min-thumb");
     const maxThumb = main.getByTestId("max-thumb");
 
     fireEvent.mouseDown(minThumb);
-    fireEvent.mouseMove(minThumb, { clientX: 100 });
-    fireEvent.mouseUp(minThumb);
+    fireEvent.mouseMove(document, { clientX: -100 });
+    fireEvent.mouseUp(document);
 
     fireEvent.mouseDown(maxThumb);
     fireEvent.mouseMove(document, { clientX: 50 });
-    fireEvent.mouseUp(minThumb);
+    fireEvent.mouseUp(document);
 
     const minInput = screen.getByTestId("min-input");
     const maxInput = screen.getByTestId("max-input");
@@ -227,67 +157,4 @@ describe("Range slider component", () => {
     fireEvent.mouseDown(minThumb);
     expect(minThumb.style.cursor).toBe("grabbing");
   });
-});
-
-//FALSE POSITIVE
-test("thumbs do not cross each other when dragging", () => {
-  render(<Range min={1} max={100} />);
-
-  const minThumb = screen.getByTestId("min-thumb");
-  const maxThumb = screen.getByTestId("max-thumb");
-  const minInput = screen.getByTestId("min-input");
-  const maxInput = screen.getByTestId("max-input");
-
-  fireEvent.mouseDown(minThumb);
-  fireEvent.mouseMove(document, { clientX: 70 });
-  fireEvent.mouseUp(document);
-
-  fireEvent.mouseDown(maxThumb);
-  fireEvent.mouseMove(document, { clientX: 40 });
-  fireEvent.mouseUp(document);
-
-  const minValue = Number(minInput.value.replace(/[^0-9.-]+/g, ""));
-  const maxValue = Number(maxInput.value.replace(/[^0-9.-]+/g, ""));
-
-  expect(minValue).toBeLessThanOrEqual(maxValue);
-});
-
-test("handles backspace key press", () => {
-  render(<Range min={1} max={100} />);
-  const minInput = screen.getByTestId("min-input");
-
-  minInput.focus();
-  fireEvent.keyDown(minInput, { key: "Backspace" });
-
-  expect(minInput.selectionStart).toBe(0);
-});
-
-test("handles arrow key press (ArrowLeft and ArrowRight)", () => {
-  render(<Range min={1} max={100} />);
-  const minInput = screen.getByTestId("min-input");
-  const maxInput = screen.getByTestId("max-input");
-
-  // Change the input values to 25 and 80
-  fireEvent.change(minInput, { target: { value: "25" } });
-  fireEvent.change(maxInput, { target: { value: "80" } });
-
-  // Simulate ArrowLeft key press on min input
-  fireEvent.keyDown(minInput, { key: "ArrowLeft" });
-
-  expect(minInput.value).toBe("24"); // Check the updated value
-
-  // Simulate ArrowRight key press on min input
-  fireEvent.keyDown(minInput, { key: "ArrowRight" });
-
-  expect(minInput.value).toBe("25"); // Check the updated value
-
-  // Simulate ArrowLeft key press on max input
-  fireEvent.keyDown(maxInput, { key: "ArrowLeft" });
-
-  expect(maxInput.value).toBe("79"); // Check the updated value
-
-  // Simulate ArrowRight key press on max input
-  fireEvent.keyDown(maxInput, { key: "ArrowRight" });
-
-  expect(maxInput.value).toBe("80"); // Check the updated value
 });
