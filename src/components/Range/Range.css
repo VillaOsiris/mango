@@ -1,6 +1,6 @@
 .container {
   width: 100%;
-  height: 100vh; /*remove this line when*/
+  height: 100vh; /*only for Dev to center on the screen - remove this line*/
   background: lightgray;
   display: flex;
   align-items: center;

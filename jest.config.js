@@ -2,6 +2,7 @@ module.exports = {
   roots: ["<rootDir>/src"],
   testPathIgnorePatterns: ["/node_modules/"],
   moduleFileExtensions: ["js", "jsx", "tsx", "ts", "json", "node"],
+  testMatch: ["<rootDir>/src/**/**/*.test.{js,jsx,ts,tsx}"],
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
   },
@@ -12,5 +13,8 @@ module.exports = {
   testEnvironment: "jsdom",
   collectCoverage: true,
   coverageDirectory: "<rootDir>/coverage",
-  collectCoverageFrom: ["**/*.{js,jsx,ts,tsx}", "!**/node_modules/**"],
+  collectCoverageFrom: [
+    "<rootDir>/src/components/**/*.{js,jsx,ts,tsx}",
+    "<rootDir>/src/utils/**/helperFunctions.tsx",
+  ],
 };

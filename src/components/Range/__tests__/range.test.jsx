@@ -138,23 +138,4 @@ describe("Range slider component", () => {
     expect(minInput.value).toBe(formatCurrency(1));
     expect(maxInput.value).toBe(formatCurrency(100));
   });
-
-  /**
-   * Thumb apearence
-   */
-
-  //FALSE POSITIVE
-  test("Bullets have cursor grabbing on mouse down", async () => {
-    render(<Range min={100} max={300} />);
-    const minThumb = screen.getByTestId("min-thumb");
-
-    Object.defineProperty(minThumb, "style", {
-      value: {
-        cursor: "grabbing",
-      },
-    });
-
-    fireEvent.mouseDown(minThumb);
-    expect(minThumb.style.cursor).toBe("grabbing");
-  });
 });
